@@ -32,15 +32,14 @@ def init_db():
 
 @app.get("/all-users")
 def get_all_users(username: str = "", email: str = "", db: Session = Depends(init_db)):
-    users = db.query(User).all()
-    filtered_users = list(
-        filter(
-            lambda x: username.casefold() in x.username.casefold()
-            and email.casefold() in x.email.casefold(),
-            users,
-        )
-    )
-    return filtered_users
+    query = db.query(User)
+
+    if username:
+        query = query.filter(User.username.ilike(f"%{username}%"))
+    if email:
+        query = query.filter(User.email.ilike(f"%{email}%"))
+    users = query.all()
+    return users
 
 
 @app.get("/users/{id}")
